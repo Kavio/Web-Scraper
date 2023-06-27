@@ -1,160 +1,191 @@
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
-<<<<<<< HEAD
 import asyncio
 import aiohttp
+import tkinter
 import time
-=======
->>>>>>> 93c0dc1ca26389b66e218a891e6d9659980a34c2
 
-urls = []
 cars = []
-<<<<<<< HEAD
-results = []
-=======
->>>>>>> 93c0dc1ca26389b66e218a891e6d9659980a34c2
 
-true_car = requests.get("https://www.truecar.com/used-cars-for-sale/listings/?page=1").text
+zip_code = input("Insert desired zipcode: ")
+search_radius = input("Insert desired search radious from zipcode in miles: ")
 
-soup = BeautifulSoup(true_car, 'lxml')
-
-<<<<<<< HEAD
 start = time.time()
 
-#carcom = requests.get
+carcom = requests.get(f"https://www.cars.com/shopping/results/?dealer_id=&keyword=&list_price_max=&list_price_min=&makes[]=&maximum_distance={search_radius} \
+                      &mileage_max=&monthly_payment=&page_size=100&sort=best_match_desc&stock_type=used&year_max=&year_min=&zip={zip_code}").text
 
-def get_total_pages(soup):
+true_car = requests.get(f"https://www.truecar.com/used-cars-for-sale/listings/location-{zip_code}/?page=1&searchRadius={search_radius}").text
 
-    new_page = soup.find_all('li', {'data-test' : 'paginationDirectionalItem'})
-    print(len(new_page))
-    next_page = new_page[1].find('a').get('href')
 
-    total_page_numbers = ""
 
-    for char in next_page:
+def int_from_string(string):
+
+    new_string = ""
+    string = string[ :(string.index('&'))]
+
+    for char in string:
         if char.isdigit():
-            total_page_numbers = total_page_numbers + char
+            new_string = new_string + char
+    return new_string
 
-    total_page_numbers = int(total_page_numbers) 
-
-    return total_page_numbers
-
-#total_page_numbers = range(int(get_total_pages(soup) / 37))
-
-def get_tasks(session):
-    tasks = []
-    for page in range(1, int((get_total_pages(soup) / 37))):
-        tasks.append(session.get(f"https://www.truecar.com/used-cars-for-sale/listings/?page={page}", ssl=False))
-    print("done",len(tasks))
-    return tasks
-
-async def get_urls(loop):
-    #timeout = aiohttp.ClientTimeout(total=100)
-    async with aiohttp.ClientSession(loop=loop) as session:
-        tasks = get_tasks(session)
-        responses = await asyncio.gather(*tasks)
-        for response in responses:
-            results.append(await response.text())
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(get_urls(loop))
-loop.close()
-
-for current_page in results:
-
-    #print('getting page {page_number}')
-    #true_car = requests.get(f"https://www.truecar.com/used-cars-for-sale/listings/?page={page_number}").text
-
-    soup = BeautifulSoup(current_page, 'lxml')
-
-    true_car_page = soup.find_all('div', {'data-test' : 'cardContent'})
-
-    links = soup.find_all('a', {'data-test' : 'cardContent'})
-    #print(links)
-
-    #print(test[3].find('div', {}).get_text())
-    for car in range(len(true_car_page)):
-        name = true_car_page[car].find('span', {'class':'truncate'}).get_text()
-        year = true_car_page[car].find('span', {'class' : 'vehicle-card-year text-xs'}).get_text()
-        price = true_car_page[car].find('div', {'data-test' : 'vehicleCardPricingBlockPrice'}).get_text()
-        if price.count('$') > 1:
-            
-            price = price[price.index('$',1):]
-
-        link = true_car_page[car].find('a').get('href')
-        car = {
-            "Name": name,
-            "Year": year,
-            "Price": price,
-            "Link": link
-        }
-        cars.append(car)
-
-
-end = time.time()
-ttime = end - start
-        
-df = pd.DataFrame(cars)
-
-print(df)
-print(ttime)
-        #print(year, name, price, link)
-    #print(len(test))
-#df.to_excel('test.xlsx', index=False)
-=======
-def get_total_pages(soup):
-
-
-    new_page = soup.find_all('li', {'data-test' : 'paginationDirectionalItem'})
-    print(len(new_page))
-    next_page = new_page[1].find('a').get('href')
-
-    total_page_numbers = ""
-
-    for char in next_page:
-        if char.isdigit():
-            total_page_numbers = total_page_numbers + char
-
-    total_page_numbers = int(total_page_numbers) 
-
-    return total_page_numbers
-
-total_page_numbers = range(int(get_total_pages(soup) / 33))
-
-for page_number in total_page_numbers:
-
-    true_car = requests.get(f"https://www.truecar.com/used-cars-for-sale/listings/?page={page_number}").text
+def scrape_truecar(true_car):
+    
+    results = []
 
     soup = BeautifulSoup(true_car, 'lxml')
 
-    test = soup.find_all('div', {'data-test' : 'cardContent'})
+    def get_total_pages(soup):
 
-    links = soup.find_all('a', {'data-test' : 'cardContent'})
-    #print(links)
-
-    #print(test[3].find('div', {}).get_text())
-    for car in range(len(test)):
-        name = test[car].find('span', {'class':'truncate'}).get_text()
-        year = test[car].find('span', {'class' : 'vehicle-card-year text-xs'}).get_text()
-        price = test[car].find('div', {'data-test' : 'vehicleCardPricingBlockPrice'}).get_text()
-        if price.count('$') > 1:
-            
-            price = price[price.index('$',1):]
-
-        link = test[car].find('a').get('href')
-        car = {
-            "Name": name,
-            "Year": year,
-            "Price": price,
-            "Link": link
-        }
-        cars.append(car)
+        new_page = soup.find_all('li', {'data-test' : 'paginationDirectionalItem'})
         
-df = pd.DataFrame(cars)
+        next_page = new_page[1].find('a').get('href')
 
-print(df)
-        #print(year, name, price, link)
-    #print(len(test))
-df.to_excel('test.xlsx', index=False)
->>>>>>> 93c0dc1ca26389b66e218a891e6d9659980a34c2
+        total_page_numbers = int_from_string(next_page)
+
+        total_page_numbers = int(total_page_numbers) 
+
+        return total_page_numbers
+
+    #total_page_numbers = range(int(get_total_pages(soup) / 37))
+
+    def get_tasks(session):
+        tasks = []
+        for page in range(1, int((get_total_pages(soup) / 37))):
+            tasks.append(session.get(f"https://www.truecar.com/used-cars-for-sale/listings/location-{zip_code}/?page={page}&searchRadius={search_radius}", ssl=False))
+        print("done",len(tasks))
+        return tasks
+
+    async def get_urls(loop):
+        async with aiohttp.ClientSession(loop=loop) as session:
+            tasks = get_tasks(session)
+            responses = await asyncio.gather(*tasks)
+            for response in responses:
+                results.append(await response.text())
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(get_urls(loop))
+    
+
+    for current_page in results:
+
+        soup = BeautifulSoup(current_page, 'lxml')
+
+        true_car_page = soup.find_all('div', {'data-test' : 'cardContent'})
+
+        for car in range(len(true_car_page)):
+            name = true_car_page[car].find('span', {'class':'truncate'}).get_text()
+            year = true_car_page[car].find('span', {'class' : 'vehicle-card-year text-xs'}).get_text()
+            '''price = true_car_page[car].find('div', {'data-test' : 'vehicleCardPricingBlockPrice'}).get_text()
+            if price is None:
+                price = ""
+            if price.count('$') > 1:
+                
+                price = price[price.index('$',1):]
+'''
+            mileage = (true_car_page[car].find('div', {'data-test' : 'vehicleMileage'}).get_text()).strip("miles")
+            car_location = true_car_page[car].find('div', {'class' :"vehicle-card-location mt-1 text-xs" }).get_text()
+            number_of_accidents = true_car_page[22].find('div', {'data-test' :"vehicleCardCondition" }).get_text()
+            if type(number_of_accidents[0]) is str:
+
+                number_of_accidents = 0
+            else:
+                number_of_accidents = int_from_string(number_of_accidents)
+
+            link = true_car_page[car].find('a').get('href')
+            car = {
+                "Name": name,
+                "Year": year,
+                "Mileage": mileage,
+                "Location": car_location,
+                "Number of Accidents": number_of_accidents,
+               # "Price": price,
+                "Link": link
+            }
+            cars.append(car)
+    
+    return  pd.DataFrame(cars)
+
+def scrape_carscom(carcom):
+    
+    results = []
+
+    def get_tasks(session):
+        tasks = []
+        for page in range(1, 2):
+            tasks.append(session.get(f"https://www.cars.com/shopping/results/?dealer_id=&keyword=&list_price_max=&list_price_min=&makes[]=&maximum_distance={search_radius} \
+                      &mileage_max=&monthly_payment=&page={page}&page_size=100&sort=best_match_desc&stock_type=used&year_max=&year_min=&zip={zip_code}", ssl=False))
+        print("done",len(tasks))
+        return tasks
+
+    async def get_urls(loop):
+        async with aiohttp.ClientSession(loop=loop) as session:
+            tasks = get_tasks(session)
+            responses = await asyncio.gather(*tasks)
+            for response in responses:
+                results.append(await response.text())
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(get_urls(loop))
+    loop.close()
+
+    for current_page in results:
+
+        soup = BeautifulSoup(current_page, 'lxml')
+
+        carcom_page = soup.find_all('div', {'class' : 'vehicle-card'})
+
+        for car in range(len(carcom_page)):
+
+            name = (carcom_page[car].find('h2', {'class' : 'title'}).get_text())[5:]
+            year = (carcom_page[car].find('h2', {'class' : 'title'}).get_text())[ :4]
+            price = carcom_page[car].find('span', {'class': 'primary-price'}).get_text()
+            mileage = (carcom_page[car].find('div', {'class': 'mileage'}).get_text()).strip("mi.")
+
+            link = requests.get('https://www.cars.com/' + carcom_page[car].find('a').get('href')).text
+            x = BeautifulSoup(link, 'lxml')
+
+            try:
+                car_location = x.find('div', {'class' : 'dealer-address'}).get_text()
+            except:
+                car_location = x.find('div', {'class' : 'dealer-address'}).get_text()
+            else:
+                car_location = "N/A"
+
+            try:
+                number_of_accidents = x.find('dd', {'data-qa' : 'accidents-or-damage-value'})
+            except:
+                number_of_accidents = "N/A"
+
+            car = {
+                "Name": name,
+                "Year": year,
+                "Mileage": mileage,
+                "Location": car_location,
+                "Number of Accidents": number_of_accidents,
+                "Price": price,
+                "Link": link
+
+            }
+            cars.append(car)
+
+    return pd.DataFrame(cars)
+
+def main():
+   
+    get_true_car = scrape_truecar(true_car)
+    get_carcom = scrape_carscom(carcom)
+
+    print(get_true_car)
+    print(get_carcom)
+   
+    end = time.time()
+    ttime = end - start
+
+
+    print(ttime)
+     
+if __name__ == "__main__":
+    main()
+
